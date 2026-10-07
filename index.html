@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171c1d">
+  <meta name="description" content="標準トレーラーと重いタンクローリーを操り、4つのコースで駐車タイムに挑戦する2Dブラウザゲーム。PCのキーボードでプレイできます。">
+  <title>TRAILER / PARK — トレーラー駐車ゲーム</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23171c1d'/%3E%3Cpath d='M7 7h10v18H7z' fill='%23dcf79a'/%3E%3Cpath d='M19 16h6v9h-6z' fill='%23e5ab5a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="physics.js"></script>
+  <script defer src="game.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="TRAILER PARK ホーム"><span class="brand-symbol" aria-hidden="true">P<span>▰</span></span><span>TRAILER<span class="brand-slash"> / </span>PARK</span></a>
+    <div class="header-right"><span class="edition">PC DEMO <span>02</span></span><button class="icon-button" id="help-button" aria-label="操作方法を表示" title="操作方法">?</button></div>
+  </header>
+  <main>
+    <div class="page-heading"><div><span class="eyebrow">PRECISION DRIVING</span><h1>その一台を、ぴたりと。</h1></div><p>ハンドルを切る。ゆっくり進む。<br>トレーラーを枠に収めよう。</p></div>
+    <div class="game-layout">
+      <section class="play-section" aria-label="トレーラー駐車ゲーム">
+        <div class="course-bar"><div><span class="course-number" id="course-number">01</span><div><h2 id="course-title">物流センター</h2><span id="course-subtitle">広いヤードで、連結車両に慣れよう。</span></div></div><div class="time-group"><div><span class="stat-label">TIME</span><strong id="timer">00:00.00</strong></div><div class="best-time"><span class="stat-label">BEST</span><span id="best-time">—</span></div></div></div>
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="game-canvas" width="1280" height="800" tabindex="0" aria-label="見下ろし型のトレーラーゲーム。矢印キーまたはWASDで走行、Spaceでブレーキ、Eで前進と後退を切り替え。">ブラウザのCanvas機能を有効にしてください。</canvas>
+          <div class="map-label"><span class="live-indicator"></span><span id="map-status">READY TO DRIVE</span></div>
+          <div class="compass" aria-hidden="true"><span>N</span><svg viewBox="0 0 24 28"><path d="M12 3 19 23 12 18 5 23Z" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></div>
+          <div class="map-legend"><span><i class="legend-truck"></i>あなたのトレーラー</span><span><i class="legend-target"></i>駐車枠</span></div>
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
+          <div class="start-panel" id="start-panel"><span class="eyebrow">READY WHEN YOU ARE</span><h3>ゆっくり、正確に。</h3><p>緑の枠にトレーラーを収めて、<br>2秒間停止するとクリア。</p><button class="primary-button" id="start-button">走行をはじめる <kbd>Enter</kbd></button><span class="start-note">最初のアクセル操作でタイム計測開始</span></div>
+          <div class="pause-overlay" id="pause-overlay" hidden><span class="eyebrow">TAKE A BREATH</span><h3>一時停止中</h3><button class="primary-button" id="resume-button">走行に戻る <kbd>Esc</kbd></button></div>
+          <div class="park-progress" id="park-progress" hidden><span>位置 OK · 停止して駐車を確定</span><div><i id="park-progress-fill"></i></div></div>
+        </div>
+        <div class="dashboard">
+          <div class="speed-meter"><span class="stat-label">SPEED</span><div><strong id="speed">0</strong><span>km/h</span></div></div>
+          <div class="gear-control"><span class="stat-label">GEAR <kbd>E</kbd></span><div><button id="gear-forward" class="selected" aria-pressed="true" title="前進">D</button><button id="gear-reverse" aria-pressed="false" title="後退">R</button></div></div>
+          <div class="steering-control"><div class="steering-wheel" id="steering-wheel" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><path d="M5 19h38M24 25v18M12 19l7 9h10l7-9"/><circle cx="24" cy="24" r="4"/></svg></div><div><span class="stat-label">STEERING</span><span id="steer-value">0°</span></div></div>
+          <div class="articulation-meter"><span class="stat-label">連結角 / 98°</span><span id="articulation-value">0°</span></div>
+          <div class="pedal-indicators"><span id="throttle-indicator"><i></i>アクセル</span><span id="brake-indicator"><i></i>ブレーキ</span></div>
+          <button class="reset-button" id="restart-button" title="Rキーでリトライ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 1 1 0 7M4 3v6h6"/></svg><span>リトライ <kbd>R</kbd></span></button>
+        </div>
+      </section>
+      <aside class="sidebar">
+        <section class="vehicle-selection"><div class="section-label"><h2>車両を選ぶ</h2><span>2 VEHICLES</span></div><div id="vehicle-list" aria-label="車両選択"></div><p id="vehicle-note">標準の加速とブレーキ。基本操作の練習に。</p></section>
+        <section class="course-selection"><div class="section-label"><h2>コースを選ぶ</h2><span id="course-count">4 COURSES</span></div><div id="course-list"></div></section>
+        <section class="controls-guide"><div class="section-label"><h2>操作方法</h2><span>KEYBOARD</span></div><div class="control-row"><span class="key-group"><kbd>←</kbd><kbd>→</kbd><small>A / D</small></span><span>ハンドルを回す</span></div><div class="control-row"><span class="key-group"><kbd>↑</kbd><small>W</small></span><span>アクセル</span></div><div class="control-row"><span class="key-group"><kbd>↓</kbd><small>S / Space</small></span><span>ブレーキ</span></div><div class="control-row"><span class="key-group"><kbd>E</kbd></span><span>前進 / 後退</span></div><div class="control-row"><span class="key-group"><kbd>Esc</kbd></span><span>一時停止</span></div><p class="driving-tip"><span>MANUAL STEERING</span>キーを離してもハンドル角は保持されます。反対方向のキーで手動で戻し、角度表示を見て調整。</p></section>
+      </aside>
+    </div>
+    <footer class="page-footer"><span><i></i>見下ろし型トレーラーシミュレーター</span><span>接触1回につき +5秒 <span class="footer-divider">/</span> 記録はこのブラウザに保存</span></footer>
+  </main>
+  <dialog id="result-dialog"><div class="dialog-top"><span class="eyebrow">PARKING COMPLETE</span><button class="icon-button dialog-close" aria-label="結果を閉じる">×</button></div><h2>ナイスパーキング。</h2><p id="result-course"></p><div class="result-time" id="result-time"></div><div class="result-details"><span>走行タイム <strong id="result-driving"></strong></span><span>接触ペナルティ <strong id="result-penalty"></strong></span></div><p id="new-record" class="new-record" hidden>NEW PERSONAL BEST</p><div class="dialog-actions"><button class="secondary-button" id="retry-result">もう一度走る</button><button class="primary-button" id="next-course">次のコース</button></div></dialog>
+  <dialog id="help-dialog"><div class="dialog-top"><span class="eyebrow">HOW TO PARK</span><button class="icon-button dialog-close" aria-label="操作方法を閉じる">×</button></div><h2>長い車体を、味方に。</h2><p>矢印キーまたはWASDで操作します。← / →でハンドルを回し、離した位置で角度を保持します。反対方向のキーで手動で戻してください。↑ / Wでアクセル、↓ / S / Spaceでブレーキ、Eで前進と後退を切り替えます。</p><p>タンクローリーは長く重いため、加速とハンドル操作がゆっくりです。惰性も強く、早めのブレーキが必要です。車両を変更すると走行は最初からになります。自己ベストは車両別に記録します。</p><p>トレーラー全体を緑の枠に収め、方向をそろえて2秒間停止するとクリア。連結角度は左右98°まで。角度が大きくなったら、ハンドルを戻して前進で姿勢を修正しましょう。接触1回につき5秒加算です。</p><p class="help-shortcuts">R：最初からやり直す　/　Esc：一時停止<br>タブを離れると自動で一時停止します。</p><button class="primary-button dialog-close">わかった、走ってみよう</button></dialog>
+</body>
+</html>
